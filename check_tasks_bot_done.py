@@ -10,10 +10,10 @@ import config
 bot = Bot(token=config.TOKEN)
 dp = Dispatcher(bot)
 
-menu_button1 = [InlineKeyboardButton('Далее', callback_data='check_task')]
+menu_button1 = InlineKeyboardButton('Далее', callback_data='check_task')
 inline_kb1 = InlineKeyboardMarkup().add(menu_button1)
 
-menu_button3 = [InlineKeyboardButton('🔁 Обновить', callback_data='check_task')]
+menu_button3 = InlineKeyboardButton('🔁 Обновить', callback_data='check_task')
 inline_kb3 = InlineKeyboardMarkup().add(menu_button3)
 
 
@@ -35,8 +35,7 @@ async def create_offer_start(message: types.Message):
         await message.answer('Нет доступа 🚫')
         return
     global msg1
-    msg1 = await message.answer(text="""Добрый день!
-Чтобы приступить к модерации задач, нажмите далее""", reply_markup=inline_kb1)
+    msg1 = await message.answer(text="""Добрый день!\nЧтобы приступить к модерации задач, нажмите далее""", reply_markup=inline_kb1)
 
 
 @dp.callback_query_handler(lambda call:call.data == 'ok')
@@ -49,7 +48,7 @@ async def all_ok(callback_query: types.CallbackQuery):
     global update_msg, task_msk
     data_from_getting = get_data()
     if data_from_getting:
-        n, name, description, tg_id, tag, checked, to_1, to_2, link, message_id = data_from_getting
+        n, name, description, tg_id, tag, checked, to_1, to_2, link, message_id, message_id_pro = data_from_getting
         text_error = ''
         if not tag:
             text_error+="Укажите тематику задачи!"
@@ -75,7 +74,7 @@ async def all_ok(callback_query: types.CallbackQuery):
 
         data_from_getting = get_data()
         if data_from_getting:
-            n, name, description, tg_id, tag, checked, to_1, to_2, link, message_id = data_from_getting
+            n, name, description, tg_id, tag, checked, to_1, to_2, link, message_id, message_id_pro = data_from_getting
             buttons_tags = [
                 InlineKeyboardButton(f'В общий канал{" ✓" if to_1 == 1 else ""}', callback_data='to_1'),
                 InlineKeyboardButton(f'В премиум канал{" ✓" if to_2 == 1 else ""}', callback_data='to_2'),
@@ -120,7 +119,7 @@ async def to_2(callback_query: types.CallbackQuery):
         return
 
     global n, update_msg, task_msk
-    n, name, description, tg_id, tag, checked, to_1, to_2, link, message_id = get_data()
+    n, name, description, tg_id, tag, checked, to_1, to_2, link, message_id, message_id_pro = get_data()
     base = sq.connect("./cool.db")
     cur = base.cursor()
     if callback_query.data == 'to_1':
@@ -182,7 +181,7 @@ async def not_ok(callback_query: types.CallbackQuery):
     except:
         pass
     if data_from_getting:
-        n, name, description, tg_id, tag, checked, to_1, to_2, link, message_id = get_data()
+        n, name, description, tg_id, tag, checked, to_1, to_2, link, message_id, message_id_pro = get_data()
         buttons_tags = [
         InlineKeyboardButton(f'В общий канал{" ✓" if to_1 == 1 else ""}', callback_data='to_1'),
         InlineKeyboardButton(f'В премиум канал{" ✓" if to_2 == 1 else ""}', callback_data='to_2'),
@@ -203,7 +202,7 @@ async def not_ok(callback_query: types.CallbackQuery):
         if link:
             task_msk = await bot.send_message(callback_query.message.chat.id,f"""<b>{name}</b>\n\n{description}\n\n<a href='{link}'>Связаться с заказчиком</a>""", parse_mode='HTML', reply_markup=inline_kb2)
         elif tg_id:
-            task_msk = await bot.send_message(callback_query.message.chat.id,f"""<b>{name}</b>\n\n{description}\n\n<a href='https://telegram.me/#{id}'>Связаться с заказчиком</a>""", parse_mode='HTML', reply_markup=inline_kb2)
+            task_msk = await bot.send_message(callback_query.message.chat.id,f"""<b>{name}</b>\n\n{description}\n\n<a href='tg://user?id={tg_id}'>Связаться с заказчиком</a>""", parse_mode='HTML', reply_markup=inline_kb2)
     else:
         update_msg = await bot.send_message(callback_query.message.chat.id, 'Все задачи проверены', reply_markup=inline_kb3)
 
@@ -222,7 +221,7 @@ async def process_callback_button_verif(callback_query: types.CallbackQuery):
         pass
     data_from_getting = get_data()
     if data_from_getting:
-        n, name, description, tg_id, tag, checked, to_1, to_2, link, message_id = data_from_getting
+        n, name, description, tg_id, tag, checked, to_1, to_2, link, message_id, message_id_pro = data_from_getting
         try:
             await msg1.delete()
         except:
@@ -232,7 +231,7 @@ async def process_callback_button_verif(callback_query: types.CallbackQuery):
         except:
             pass
         
-        n, name, description, tg_id, tag, checked, to_1, to_2, link, message_id = data_from_getting
+        n, name, description, tg_id, tag, checked, to_1, to_2, link, message_id, message_id_pro = data_from_getting
         buttons_tags = [
             InlineKeyboardButton(f'В общий канал{" ✓" if to_1 == 1 else ""}', callback_data='to_1'),
             InlineKeyboardButton(f'В премиум канал{" ✓" if to_2 == 1 else ""}', callback_data='to_2'),
@@ -253,7 +252,7 @@ async def process_callback_button_verif(callback_query: types.CallbackQuery):
         if link:
             task_msk = await bot.send_message(callback_query.message.chat.id,f"""<b>{name}</b>\n\n{description}\n\n<a href='{link}'>Связаться с заказчиком</a>""", parse_mode='HTML', reply_markup=inline_kb2)
         elif tg_id:
-            task_msk = await bot.send_message(callback_query.message.chat.id,f"""<b>{name}</b>\n\n{description}\n\n<a href='https://telegram.me/#{id}'>Связаться с заказчиком</a>""", parse_mode='HTML', reply_markup=inline_kb2)
+            task_msk = await bot.send_message(callback_query.message.chat.id,f"""<b>{name}</b>\n\n{description}\n\n<a href='tg://user?id={tg_id}'>Связаться с заказчиком</a>""", parse_mode='HTML', reply_markup=inline_kb2)
 
     else:
         await bot.answer_callback_query(callback_query.id, show_alert=False)
@@ -265,14 +264,13 @@ async def process_callback_button_verif(callback_query: types.CallbackQuery):
 
 @dp.callback_query_handler(lambda call:call.data in ["маркетинг", "копирайтинг", "разработка", "дизайн", "сайты"])
 async def to_1(callback_query: types.CallbackQuery):
-    
     # Check admin rights
     if str(callback_query.message.chat.id) not in auth_list:
         await bot.send_message(callback_query.message.chat.id, 'Нет доступа 🚫')
         return
 
     global n, update_msg, task_msk
-    n, name, description, tg_id, tag, checked, to_1, to_2, link, message_id = get_data()
+    n, name, description, tg_id, tag, checked, to_1, to_2, link, message_id, message_id_pro = get_data()
     if tag == callback_query.data:
         await bot.answer_callback_query(callback_query.id, show_alert=False)
         return
@@ -300,7 +298,6 @@ async def to_1(callback_query: types.CallbackQuery):
         InlineKeyboardButton('Отклонить ❌', callback_data='not_ok'),
         InlineKeyboardButton('Готово ✅', callback_data='ok'))
     await task_msk.edit_reply_markup(reply_markup=inline_kb2)
-    
 
 
 @dp.errors_handler()
